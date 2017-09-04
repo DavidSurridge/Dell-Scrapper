@@ -1,10 +1,20 @@
 package exper;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 public class T1 {
@@ -12,7 +22,9 @@ public class T1 {
 	public static String getStringContaining(String start, String end, String string) {
 		if (string.indexOf(start) != -1) {
 			string = string.substring(string.indexOf(start) + start.length());
-			string = string.substring(0, string.indexOf(end));
+			if (!end.equals("")) {
+				string = string.substring(0, string.indexOf(end));
+			}
 			return string;
 		}
 		return null;
@@ -21,68 +33,74 @@ public class T1 {
 	public static void main(String[] args) throws Exception {
 
 		Document response = Jsoup.connect("http://www.dell.com/ie/p/laptops?").get();
+		Element container = response.getElementById("laptops");
+		Elements laptops = container.getElementsByAttribute("data-testid");
+		List<String> hrefs = laptops.eachAttr("href");
 
-		Elements laptopTypes = response.getElementsByClass("c4 seriesOptions");
-		for (Element laptops : laptopTypes) {
-			Elements hrefHtml = laptops.getElementsByAttribute("href");
-			List<String> hrefs = hrefHtml.eachAttr("href");
-			for (String href : hrefs) {
-				String laptopUrL = "http://www.dell.com" + href;
-				response = Jsoup.connect(laptopUrL).get();
-				Elements laptopModels = response.getElementsByClass("configStackBody highlightSpecs");
-				Element name = response.getElementById("mastheadPageTitle");
+		for (String href : hrefs) {
 
-				for (Element laptop : laptopModels) {
-					Elements singles = laptop.children();
-					// figure out better way of extracting children
-					for (Element single : singles) {
+			String laptopModel = getStringContaining("/spd/", "", href);
+			System.out.println(laptopModel);
 
-						if (!name.toString().contains("Alienware")) {
-							// CPU
-							String CPU = single.getElementsByAttributeValue("data-specindex", "1").eachText().get(0);
-							CPU = getStringContaining("Core™ ", " ", CPU);
-							
-							// Ram							
-							String RAM = single.getElementsByAttributeValue("data-specindex", "7").eachText().get(0);
-							RAM = getStringContaining("", "z", RAM);
-							System.out.println(name.text());
-							System.out.println(CPU);
-							System.out.println(RAM + "z");
-							
-							// SSD/HDD
-							String diskDescription = single.getElementsByAttributeValue("data-specindex", "9").eachText().get(0);
-							boolean SSD = diskDescription.contains("Solid State Drive");
-							boolean HDD = diskDescription.contains("Hard Drive");
-							String drives[] = diskDescription.split(" \\+ ");
-							for (String drive : drives) {
-								// mapper to add each drive, size and type
-								String size = getStringContaining("", " ", drive);
-							}
-							System.out.println("SSD: " + SSD + " HDD: " + HDD);
-							// Graphics or Alienware SSD
-							System.out.println(
-									single.getElementsByAttributeValue("data-specindex", "13").eachText().get(0));
-							// screen
-							System.out.println(
-									single.getElementsByAttributeValue("data-specindex", "15").eachText().get(0));
-							// price
-							System.out.println(single.getElementsByClass("pLine dellPrice").eachText().get(0));
-							System.out.println(" ");
-						} else {
-							System.out.println(name.text());
-							System.out.println(
-									single.getElementsByAttributeValue("data-specindex", "1").eachText().get(0));
-							System.out.println(
-									single.getElementsByAttributeValue("data-specindex", "11").eachText().get(0));
-							System.out.println(
-									single.getElementsByAttributeValue("data-specindex", "13").eachText().get(0));
-							System.out.println(
-									single.getElementsByAttributeValue("data-specindex", "5").eachText().get(0));
-							System.out.println(
-									single.getElementsByAttributeValue("data-specindex", "9").eachText().get(0));
-							System.out.println(" ");
-						}
+			URL url = new URL("http://www.dell.com/csbapi/en-ie/productanavfilter/GetSystemsResults?ProductCode="
+					+ laptopModel + "&page=1&pageSize=3&preview=");
+			
+			try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
+				JsonObject obj = rdr.readObject();
+				JsonArray results = obj.getJsonObject("Results").getJsonArray("Stacks");
+
+				for (int i = 0; i < results.size(); i++) {
+					String name = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
+							.getJsonObject("Stack").getJsonObject("Title").get("Value").toString();
+
+					Double price = Double.parseDouble(
+							obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i).getJsonObject("Stack")
+									.getJsonObject("Pricing").getJsonObject("DellPrice").get("InnerValue").toString());
+
+					String cpuDescription = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
+							.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(0).get("Value").toString();
+					String CPU = getStringContaining("Core™ ", " ", cpuDescription);
+
+					String operatingSysDescription = obj.getJsonObject("Results").getJsonArray("Stacks")
+							.getJsonObject(i).getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(1)
+							.get("Value").toString();
+
+					String ramDescription = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
+							.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(2).get("Value").toString();
+
+					/*
+					 * String RAM = getStringContaining("", ";", ramDescription); String ramSize =
+					 * getStringContaining("", " ", RAM); String ramType = getStringContaining(" ",
+					 * "-", RAM); int ramSpeed = Integer.parseInt(getStringContaining("-", "MHz",
+					 * RAM));
+					 */
+
+					String diskDescription = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
+							.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(3).get("Value").toString();
+
+					String drives[] = diskDescription.split(" \\+ ");
+					for (String drive : drives) {
+
+						boolean SSD = drive.contains("Solid State Drive");
+						boolean HDD = drive.contains("Hard Drive");
+						String size = getStringContaining("", " ", drive);
 					}
+
+					String graphicsDescription = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
+							.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(4).get("Value").toString();
+					String graphicsModel = getStringContaining("", " ", graphicsDescription);
+
+					String screenDescription = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
+							.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(5).get("Value").toString();
+
+					System.out.println("name: " + name);
+					System.out.println("price: " + price);
+					System.out.println("CPU: " + CPU);
+					System.out.println("RAMDESC: " + ramDescription);
+					System.out.println("DISKDESC: " + diskDescription);
+					System.out.println("GRAPHICSDESC: " + graphicsDescription);
+					System.out.println("SCREENSDESC: " + screenDescription);
+					System.out.println(" ");
 				}
 			}
 		}
