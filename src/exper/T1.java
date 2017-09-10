@@ -18,6 +18,49 @@ import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 public class T1 {
+	private static String name;
+	private static Double price;
+	private static String cpuDescription;
+	private static String CPU;
+	private static String operatingSysDescription;
+	private static String ramDescription;
+	private static String diskDescription;
+	private static String graphicsDescription;
+	private static String graphicsModel;
+	private static String screenDescription;
+
+	public T1() {
+	}
+
+	public void setName(JsonObject input) {
+		T1.name = input.getJsonObject("Stack").getJsonObject("Title").get("Value").toString();
+	}
+
+	public String getName() {
+		return T1.name;
+	}
+
+	public void setPrice(JsonObject input) {
+		T1.price = Double.parseDouble(input.getJsonObject("Stack").getJsonObject("Pricing").getJsonObject("DellPrice")
+				.get("InnerValue").toString());
+	}
+
+	public Double getPrice() {
+		return T1.price;
+	}
+
+	public void setCpuDescription(JsonObject input) {
+		T1.cpuDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(0).get("Value")
+				.toString();
+	}
+
+	public static String getCpuDescription() {
+		return T1.cpuDescription;
+	}
+
+	public void setCpu(JsonObject input) {
+		T1.CPU = getStringContaining("Core™ ", " ", getCpuDescription());
+	}
 
 	public static String getStringContaining(String start, String end, String string) {
 		if (string.indexOf(start) != -1) {
@@ -31,6 +74,7 @@ public class T1 {
 	}
 
 	public static void main(String[] args) throws Exception {
+		T1 s = new T1();
 
 		Document response = Jsoup.connect("http://www.dell.com/ie/p/laptops?").get();
 		Element container = response.getElementById("laptops");
@@ -44,22 +88,22 @@ public class T1 {
 
 			URL url = new URL("http://www.dell.com/csbapi/en-ie/productanavfilter/GetSystemsResults?ProductCode="
 					+ laptopModel + "&page=1&pageSize=3&preview=");
-			
+
 			try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
 				JsonObject obj = rdr.readObject();
 				JsonArray results = obj.getJsonObject("Results").getJsonArray("Stacks");
 
 				for (int i = 0; i < results.size(); i++) {
-					String name = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
-							.getJsonObject("Stack").getJsonObject("Title").get("Value").toString();
-
-					Double price = Double.parseDouble(
-							obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i).getJsonObject("Stack")
-									.getJsonObject("Pricing").getJsonObject("DellPrice").get("InnerValue").toString());
+					JsonObject name = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i);
+					s.setName(name);
+					// .getJsonObject("Stack").getJsonObject("Title").get("Value").toString();
+					// add details then append to array like structure to contain each instance.
+					s.setPrice(name);
+					s.setCpuDescription(name);
 
 					String cpuDescription = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
 							.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(0).get("Value").toString();
-					String CPU = getStringContaining("Core™ ", " ", cpuDescription);
+					String CPU = getStringContaining("Core™ ", " ", getCpuDescription());
 
 					String operatingSysDescription = obj.getJsonObject("Results").getJsonArray("Stacks")
 							.getJsonObject(i).getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(1)
@@ -92,15 +136,17 @@ public class T1 {
 
 					String screenDescription = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i)
 							.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(5).get("Value").toString();
+					// String screenSize = getStringContaining("", "-inch", screenDescription);
+					String screenResolutionType = getStringContaining("-inch ", " (", screenDescription);
 
-					System.out.println("name: " + name);
-					System.out.println("price: " + price);
-					System.out.println("CPU: " + CPU);
-					System.out.println("RAMDESC: " + ramDescription);
-					System.out.println("DISKDESC: " + diskDescription);
-					System.out.println("GRAPHICSDESC: " + graphicsDescription);
-					System.out.println("SCREENSDESC: " + screenDescription);
-					System.out.println(" ");
+					System.out.println("name: " + s.getName());
+					System.out.println("price: " + s.getPrice());
+					/*
+					 * System.out.println("CPU: " + CPU); System.out.println("RAMDESC: " +
+					 * ramDescription); System.out.println("DISKDESC: " + diskDescription);
+					 * System.out.println("GRAPHICSDESC: " + graphicsDescription);
+					 * System.out.println("SCREENSDESC: " + screenDescription);
+					 */System.out.println(" ");
 				}
 			}
 		}
