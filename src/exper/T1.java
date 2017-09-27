@@ -73,29 +73,15 @@ public class T1 {
 		if (T1.name.contains("Alienware")) {
 			i = 4;
 		}
-
-		if (T1.name.contains("Inspiron 15")) {
-			i = 3;
-		}
-		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
-			i = 2;
-		}
-		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
-			i = 2;
-		} 
-		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
-			i = 3;
-		}
-		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
-			i = 3;
-		}
-		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
-			i = 3;
-		}
-		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
-			i = 3;
-		}
 		
+		if (T1.laptopModel.contains("inspiron-15-3567-laptop") 
+			|| T1.laptopModel.contains("inspiron-15-5579-2-in-1-laptop")
+			|| T1.laptopModel.contains("inspiron-13-7370-laptop")
+			|| T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")
+			|| T1.laptopModel.contains("inspiron-17-5767-laptop")
+			|| T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
+			i = 3;
+		}
 		T1.ramDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(i).get("Value")
 				.toString();
 	}
@@ -118,26 +104,15 @@ public class T1 {
 		if (T1.name.contains("Alienware")) {
 			i = 5;
 		}
-		if (T1.name.contains("Inspiron 15")) {
+
+		if (T1.laptopModel.contains("inspiron-15-3567-laptop") 
+				|| T1.laptopModel.contains("inspiron-17-5767-laptop")
+				|| T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-13-7370-laptop")
+				|| T1.laptopModel.contains("inspiron-15-5579-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-15-7570-laptop")) {
 			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
-			i = 3;
-		}
-		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
-			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
-			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
-			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
-			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
-			i = 3;
 		}
 
 		T1.diskDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(i).get("Value")
@@ -153,29 +128,12 @@ public class T1 {
 		if (T1.name.contains("Alienware")) {
 			i = 2;
 		}
-		if (T1.name.contains("Inspiron 15")) {
-			i = 5;
-		}
-		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
-			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
-			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
-			i = 4;
-		}
-		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
-			i = 5;
-		}
-
-		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
-			i = 5;
-		}
-		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
-			i = 5;
-		}
-		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
+		if (T1.laptopModel.contains("inspiron-17-5767-laptop")
+				|| T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-15-5579-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-13-7370-laptop")
+				|| T1.laptopModel.contains("inspiron-15-3567-laptop")) {
 			i = 5;
 		}
 
@@ -200,38 +158,18 @@ public class T1 {
 		if (T1.name.contains("Alienware")) {
 			i = 3;
 		}
-		if (T1.name.contains("Inspiron 15 3000")) {
-			i = 5;
-		}
-		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
-			i = 6;
-		}
-		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
-			i = 6;
-		}
 		
-		if (T1.laptopModel.contains("inspiron-15-3567-laptop")) {
+		if (T1.laptopModel.contains("inspiron-13-7370-laptop") || T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop") 
+				|| T1.laptopModel.contains("inspiron-15-5579-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")
+				|| T1.laptopModel.contains("inspiron-15-3567-laptop")
+				|| T1.laptopModel.contains("inspiron-15-3567-laptop")
+				|| T1.laptopModel.contains("inspiron-15-5567-laptop")
+				|| T1.laptopModel.contains("inspiron-15-7570-laptop")
+				|| T1.laptopModel.contains("inspiron-17-5767-laptop")
+				) {
 			i = 6;
 		}
-		if (T1.laptopModel.contains("inspiron-15-5567-laptop")) {
-			i = 6;
-		}
-		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
-			i = 6;
-		}
-		if (T1.laptopModel.contains("inspiron-15-5579-2-in-1-laptop")) {
-			i = 6;
-		}
-		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
-			i = 5;
-		}
-		if (T1.laptopModel.contains("inspiron-15-7570-laptop")) {
-			i = 6;
-		}
-		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
-			i = 6;
-		}
-		
 
 		T1.screenDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(i).get("Value")
 				.toString();
@@ -285,14 +223,14 @@ public class T1 {
 					s.setScreenDescription(input);
 					if (true) {
 						/*System.out.println("name: " + s.getName());
-						System.out.println("price: " + s.getPrice());
+							System.out.println("price: " + s.getPrice());
 						System.out.println("CPUdesc: " + s.getCpuDescription());
 						System.out.println("CPU: " + s.getCPU());
-						System.out.println("diskDesc: " + s.getDiskDescription());
+						System.out.println("diskDesc: " + s.getDiskDescription());*/
 						System.out.println("ramDesc: " + s.getRamDescription());
-						System.out.println("graphicsDesc: " + s.getGraphicsDescription());
-						System.out.println("graphicsModel: " + s.getGraphicsModel());*/
-						System.out.println("screenDesc: " + s.getScreenDescription());
+						/*System.out.println("graphicsDesc: " + s.getGraphicsDescription());
+						System.out.println("graphicsModel: " + s.getGraphicsModel());
+						System.out.println("screenDesc: " + s.getScreenDescription());*/
 						/*System.out.println(" ");*/
 					}
 				}
