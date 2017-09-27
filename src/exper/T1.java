@@ -3,6 +3,8 @@ package exper;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -13,6 +15,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class T1 {
+	private static String laptopModel;
 	private static String name;
 	private static Double price;
 	private static String cpuDescription;
@@ -70,10 +73,29 @@ public class T1 {
 		if (T1.name.contains("Alienware")) {
 			i = 4;
 		}
+
 		if (T1.name.contains("Inspiron 15")) {
 			i = 3;
 		}
-
+		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
+			i = 2;
+		}
+		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
+			i = 2;
+		} 
+		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
+			i = 3;
+		}
+		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
+			i = 3;
+		}
+		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
+			i = 3;
+		}
+		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
+			i = 3;
+		}
+		
 		T1.ramDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(i).get("Value")
 				.toString();
 	}
@@ -99,6 +121,25 @@ public class T1 {
 		if (T1.name.contains("Inspiron 15")) {
 			i = 4;
 		}
+		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
+			i = 3;
+		}
+		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
+			i = 4;
+		}
+		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
+			i = 4;
+		}
+		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
+			i = 4;
+		}
+		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
+			i = 4;
+		}
+		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
+			i = 3;
+		}
+
 		T1.diskDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(i).get("Value")
 				.toString();
 	}
@@ -115,6 +156,29 @@ public class T1 {
 		if (T1.name.contains("Inspiron 15")) {
 			i = 5;
 		}
+		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
+			i = 4;
+		}
+		if (T1.laptopModel.contains("inspiron-15-3558-laptop")) {
+			i = 4;
+		}
+		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
+			i = 4;
+		}
+		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
+			i = 5;
+		}
+
+		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
+			i = 5;
+		}
+		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
+			i = 5;
+		}
+		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
+			i = 5;
+		}
+
 		T1.graphicsDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(i).get("Value")
 				.toString();
 	}
@@ -139,9 +203,36 @@ public class T1 {
 		if (T1.name.contains("Inspiron 15 3000")) {
 			i = 5;
 		}
-		/*if (T1.name.contains("Inspiron 15") & !T1.name.contains("Inspiron 15 3000")) {
+		if (T1.laptopModel.contains("inspiron-13-7370-laptop")) {
 			i = 6;
-		}*/
+		}
+		if (T1.laptopModel.contains("inspiron-13-5379-2-in-1-laptop")) {
+			i = 6;
+		}
+		
+		if (T1.laptopModel.contains("inspiron-15-3567-laptop")) {
+			i = 6;
+		}
+		if (T1.laptopModel.contains("inspiron-15-5567-laptop")) {
+			i = 6;
+		}
+		if (T1.laptopModel.contains("inspiron-17-5767-laptop")) {
+			i = 6;
+		}
+		if (T1.laptopModel.contains("inspiron-15-5579-2-in-1-laptop")) {
+			i = 6;
+		}
+		if (T1.laptopModel.contains("inspiron-15-7577-laptop")) {
+			i = 5;
+		}
+		if (T1.laptopModel.contains("inspiron-15-7570-laptop")) {
+			i = 6;
+		}
+		if (T1.laptopModel.contains("inspiron-17-7773-2-in-1-laptop")) {
+			i = 6;
+		}
+		
+
 		T1.screenDescription = input.getJsonObject("Specs").getJsonArray("TechSpecs").getJsonObject(i).get("Value")
 				.toString();
 	}
@@ -158,6 +249,11 @@ public class T1 {
 	}
 
 	public static void main(String[] args) throws Exception {
+		// while(true) {
+		// Thread.sleep(5000);
+		// TimeUnit.SECONDS.sleep(5);
+		System.out.println("Start");
+
 		T1 s = new T1();
 
 		Document response = Jsoup.connect("http://www.dell.com/ie/p/laptops?").get();
@@ -166,13 +262,11 @@ public class T1 {
 		List<String> hrefs = laptops.eachAttr("href");
 
 		for (String href : hrefs) {
-			//make getter and setter methods for laptop model
-			String laptopModel = getStringContaining("/spd/", "", href);
-			//filter some setter methods using the laptop model variable
+			T1.laptopModel = getStringContaining("/spd/", "", href);
 			System.out.println("Laptop model: " + laptopModel);
 
 			URL url = new URL("http://www.dell.com/csbapi/en-ie/productanavfilter/GetSystemsResults?ProductCode="
-					+ laptopModel + "&page=1&pageSize=3&preview=");
+					+ laptopModel + "&page=1&pageSize=60&preview=");
 
 			try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
 				JsonObject obj = rdr.readObject();
@@ -189,19 +283,21 @@ public class T1 {
 					s.setGraphicsDescription(input);
 					s.setGraphicsModel();
 					s.setScreenDescription(input);
-					if(T1.name.toLowerCase().contains("inspiron")) {
-					System.out.println("name: " + s.getName());
-					System.out.println("price: " + s.getPrice());
-					System.out.println("CPUdesc: " + s.getCpuDescription());
-					System.out.println("CPU: " + s.getCPU());
-					System.out.println("diskDesc: " + s.getDiskDescription());
-					System.out.println("ramDesc: " + s.getRamDescription());
-					System.out.println("graphicsDesc: " + s.getGraphicsDescription());
-					System.out.println("graphicsModel: " + s.getGraphicsModel());
-					System.out.println("screenDesc: " + s.getScreenDescription());
-					System.out.println(" ");}
+					if (true) {
+						/*System.out.println("name: " + s.getName());
+						System.out.println("price: " + s.getPrice());
+						System.out.println("CPUdesc: " + s.getCpuDescription());
+						System.out.println("CPU: " + s.getCPU());
+						System.out.println("diskDesc: " + s.getDiskDescription());
+						System.out.println("ramDesc: " + s.getRamDescription());
+						System.out.println("graphicsDesc: " + s.getGraphicsDescription());
+						System.out.println("graphicsModel: " + s.getGraphicsModel());*/
+						System.out.println("screenDesc: " + s.getScreenDescription());
+						/*System.out.println(" ");*/
+					}
 				}
 			}
 		}
 	}
 }
+// }
