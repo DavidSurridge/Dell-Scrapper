@@ -2,6 +2,7 @@ package exper;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.json.Json;
@@ -15,12 +16,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class DellScrape {
-	public static void main(String[] args) throws Exception {
-		// while(true) {
-		// Thread.sleep(5000);
-		// TimeUnit.SECONDS.sleep(5);
+	public static HashMap<String, Laptop> doScrape() throws Exception {
 		System.out.println("Start");
-
+		HashMap<String, Laptop> laptopsResults = new HashMap<String, Laptop>();
 		Document response = Jsoup.connect("http://www.dell.com/ie/p/laptops?").get();
 		Element container = response.getElementById("laptops");
 		Elements laptops = container.getElementsByAttribute("data-testid");
@@ -41,8 +39,32 @@ public class DellScrape {
 					JsonObject input = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i);
 					DellParse dellParser = new DellParse(input);
 					Laptop laptop = dellParser.getLaptop();
+					laptopsResults.put(laptop.getItemIdentifier(), laptop);
 				}
 			}
+		}
+		return laptopsResults;
+	}
+
+	public static void main(String[] args) throws Exception {
+		HashMap<String, Laptop> previousResults = null;
+		// consider method for search criteria, return price check on multiple laptop
+		// that meet criteria.
+		String searchId = "test";
+		Double priceDiffThreshold = 100.00;
+		Double PriceGoalThreshold = 1000.00;
+		while (true) {
+			HashMap<String, Laptop> newLaptopResults = doScrape();
+			if (!previousResults.isEmpty() & searchId != null) {
+				if (((previousResults.get(searchId).getPrice())
+						- (newLaptopResults.get(searchId).getPrice()) > priceDiffThreshold)
+						|| (newLaptopResults.get(searchId).getPrice()) > PriceGoalThreshold) {
+					// add boolean to stop sending repeatedly when priceGoalThreshold is reached.
+					// send text code notification here
+				}
+			}
+
+			previousResults = newLaptopResults;
 		}
 	}
 

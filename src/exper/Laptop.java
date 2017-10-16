@@ -1,6 +1,6 @@
 package exper;
 
-public class Laptop {
+public class Laptop implements Comparable<Object> {
 
 	private String laptopModel;
 	private String name;
@@ -84,5 +84,14 @@ public class Laptop {
 
 	public String getItemIdentifier() {
 		return itemIdentifier;
+	}
+
+	@Override
+	public int compareTo(Object anotherLaptop) {
+		  if (!(anotherLaptop instanceof Laptop))
+		      throw new ClassCastException("A Laptop object expected.");
+		    Double anotherLaptopPrice = ((Laptop) anotherLaptop).getPrice();  
+		    return (int) (this.price - anotherLaptopPrice);    
+	
 	}
 }
