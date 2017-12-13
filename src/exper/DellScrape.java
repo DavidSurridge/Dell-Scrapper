@@ -22,16 +22,51 @@ import org.jsoup.select.Elements;
 
 public class DellScrape {
   private static final Logger logger = LogManager.getLogger();
-  private static String accountSid = null;
-  private static String authToken = null;
+  private static String accountSid = System.getenv().get("TwilioACCOUNT_SID");
+  private static String authToken = System.getenv().get("TwilioAUTH_TOKEN");
   private static Double priceDiffThreshold = 100.00;
   private static  Map<String, Laptop> newLaptopResults = null;
   
+
+
+  public static void main(String[] args) {
+    handleRequest("");
+  }
+  
   /**
-   * Scrape of Dell site for pricing info.
-   * @return map 
-   * @throws Exception if cannot connect to dell site then throws generic Exception
+   * AWS Lambda handler that runs scrape code and sends results to SQL database .
+   * @return String 
    */
+  public static String handleRequest(String input) {
+
+    try {
+      newLaptopResults = doScrape();
+
+      try (LaptopDao connect = new LaptopDaoImpl()) {
+        Map<String, Double> currentPrice = connect.getPrices();
+
+        if (currentPrice != null && !currentPrice.isEmpty()) {
+          newLaptopResults.forEach((identifier, laptop) -> {
+
+            double priceDiff = currentPrice.get(identifier) - laptop.getPrice();
+
+            if (priceDiff > -1 && priceDiff < 1) {
+              newLaptopResults.remove(identifier);
+
+            } else if (priceDiff > priceDiffThreshold) {
+              sendText(laptop.getName(), laptop.getPrice(), currentPrice.get(identifier));
+            }
+          });
+        }
+        connect.insertNewLaptopResults(newLaptopResults);
+      }
+
+    } catch (Exception e1) {
+      logger.fatal("Error performing doScrape Method", e1);
+    }
+    return "finished";
+  }
+
   public static Map<String, Laptop> doScrape() throws Exception {
     HashMap<String, Laptop> laptopsResults = new HashMap<>();
     Document response = Jsoup.connect("http://www.dell.com/ie/p/laptops?").get();
@@ -59,48 +94,8 @@ public class DellScrape {
     }
     return laptopsResults;
   }
-
-  private static void setCredentials() { 
-    accountSid = System.getenv().get("TwilioACCOUNT_SID");
-    authToken = System.getenv().get("TwilioAUTH_TOKEN");
-  }
   
-  public static void main(String[] args) {
-    handleRequest("");
-  }
   
-  public static String handleRequest(String input) {
-
-    setCredentials();
-    try {
-      newLaptopResults = doScrape();
-    } catch (Exception e1) {
-      logger.fatal("Error performing doScrape Method", e1);
-    }
-
-    if (newLaptopResults != null && !newLaptopResults.isEmpty()) {
-      try (LaptopDao connect = new LaptopDaoImpl()) {
-        Map<String, Double> currentPrice = connect.getPrices();
-
-        if (currentPrice != null && !currentPrice.isEmpty()) {
-          newLaptopResults.forEach((identifier, laptop) -> {
-
-            double priceDiff = currentPrice.get(identifier) - laptop.getPrice();
-
-            if (priceDiff > -1 && priceDiff < 1) {
-              newLaptopResults.remove(identifier);
-
-            } else if (priceDiff > priceDiffThreshold) {
-              sendText(laptop.getName(), laptop.getPrice(), currentPrice.get(identifier));
-            }
-          });
-        }
-        connect.insertNewLaptopResults(newLaptopResults);
-      }
-    }
-    return "finished all";
-  }
-
   public static void sendText(String laptopModel, Double price, Double newPrice) {
     String messageContent = "Price change detected for " 
         + laptopModel + "."

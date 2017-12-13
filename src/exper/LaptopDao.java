@@ -1,11 +1,8 @@
 package exper;
 
-import java.sql.Statement;
 import java.util.Map;
 
 public interface LaptopDao extends AutoCloseable {
-  
-
   
   public Map<String, Double> getPrices();
   

@@ -2,17 +2,15 @@ package exper;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LaptopDaoImpl implements LaptopDao{
+public class LaptopDaoImpl implements LaptopDao {
   private Connection conn = null;
   private Statement statement = null;
   private ResultSet resultSet = null;
@@ -37,11 +35,6 @@ public class LaptopDaoImpl implements LaptopDao{
     }
   }
 
-
-
-  //get distinct results for the latest information for each model. 
-  //put identifier and information into map(string, array).
-  //
   @Override
   public Map<String, Double> getPrices() {
     final String sql = "SELECT " 
