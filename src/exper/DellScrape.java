@@ -1,10 +1,14 @@
 package exper;
 
 import com.twilio.Twilio;
+import com.twilio.exception.ApiException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.rest.api.v2010.account.MessageCreator;
 import com.twilio.type.PhoneNumber;
+
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -21,14 +25,14 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class DellScrape {
+  
+  private DellScrape() {}
+  
   private static final Logger logger = LogManager.getLogger();
   private static String accountSid = System.getenv().get("TwilioACCOUNT_SID");
   private static String authToken = System.getenv().get("TwilioAUTH_TOKEN");
   private static Double priceDiffThreshold = 100.00;
-  private static  Map<String, Laptop> newLaptopResults = null;
   
-
-
   public static void main(String[] args) {
     handleRequest("");
   }
@@ -40,62 +44,66 @@ public class DellScrape {
   public static String handleRequest(String input) {
 
     try {
-      newLaptopResults = doScrape();
-
-      try (LaptopDao connect = new LaptopDaoImpl()) {
-        Map<String, Double> currentPrice = connect.getPrices();
-
-        if (currentPrice != null && !currentPrice.isEmpty()) {
-          newLaptopResults.forEach((identifier, laptop) -> {
-
-            double priceDiff = currentPrice.get(identifier) - laptop.getPrice();
-
-            if (priceDiff > -1 && priceDiff < 1) {
-              newLaptopResults.remove(identifier);
-
-            } else if (priceDiff > priceDiffThreshold) {
-              sendText(laptop.getName(), laptop.getPrice(), currentPrice.get(identifier));
-            }
-          });
-        }
-        connect.insertNewLaptopResults(newLaptopResults);
-      }
-
+      doScrape();
     } catch (Exception e1) {
       logger.fatal("Error performing doScrape Method", e1);
     }
     return "finished";
   }
-
-  public static Map<String, Laptop> doScrape() throws Exception {
+  
+  /**
+   * Load information from the Dell site. <br>
+   * Uses DellLaptopBuilder to assist in processing information. <br>
+   * Uses LaptopDaoImp to transmit information to DB. 
+   * @throws MalformedURLException 
+   * 
+   */
+  public static void doScrape() throws IOException {
     HashMap<String, Laptop> laptopsResults = new HashMap<>();
     Document response = Jsoup.connect("http://www.dell.com/ie/p/laptops?").get();
     Element container = response.getElementById("laptops");
     Elements laptops = container.getElementsByAttribute("data-testid");
     List<String> hrefs = laptops.eachAttr("href");
     
-    for (String href : hrefs) {
-      String laptopModel = getStringContaining("/spd/", "", href);
+    try (LaptopDao connect = new LaptopDaoImpl()) {
+      Map<String, Double> currentPrices = connect.getPrices();
+     
+      for (String href : hrefs) {
+        String laptopModel = getStringContaining("/spd/", "", href);
 
-      URL url = new URL("http://www.dell.com/csbapi/en-ie/productanavfilter/GetSystemsResults?ProductCode="
-          + laptopModel + "&page=1&pageSize=60&preview=");
+        URL url = new URL("http://www.dell.com/csbapi/en-ie/productanavfilter/GetSystemsResults?ProductCode="
+            + laptopModel + "&page=1&pageSize=60&preview=");
 
-      try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
-        JsonObject obj = rdr.readObject();
-        JsonArray results = obj.getJsonObject("Results").getJsonArray("Stacks");
+        try (InputStream is = url.openStream(); JsonReader rdr = Json.createReader(is)) {
+          JsonObject obj = rdr.readObject();
+          JsonArray results = obj.getJsonObject("Results").getJsonArray("Stacks");
 
-        for (int i = 0; i < results.size(); i++) {
-          JsonObject input = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i);
-          DellParse dellParser = new DellParse(input);
-          Laptop laptop = dellParser.getLaptop();
-          laptopsResults.put(laptop.getItemIdentifier(), laptop);
+          for (int i = 0; i < results.size(); i++) {
+            JsonObject input = obj.getJsonObject("Results").getJsonArray("Stacks").getJsonObject(i);
+            DellLaptopBuilder dellLaptopBulilder = new DellLaptopBuilder(input);
+            Laptop laptop = dellLaptopBulilder.getLaptop();
+            String laptopId = laptop.getItemIdentifier();
+            
+            double newPrice = laptop.getPrice(); 
+            double currentPrice = currentPrices.isEmpty() ? 0 : currentPrices.get(laptopId);
+            double priceDiff = currentPrice - newPrice;
+             
+            if ((newPrice > 0) && (priceDiff > 1 || priceDiff < -1)) {
+              laptopsResults.put(laptopId, laptop);
+            }
+
+            if (priceDiff > priceDiffThreshold) {
+              sendText(laptopId, newPrice, currentPrice);
+            }
+          }
         }
       }
+      if (!laptopsResults.isEmpty()) {
+        connect.insertNewLaptopResults(laptopsResults);
+      }
     }
-    return laptopsResults;
   }
-  
-  
+
   public static void sendText(String laptopModel, Double price, Double newPrice) {
     String messageContent = "Price change detected for " 
         + laptopModel + "."
@@ -103,10 +111,14 @@ public class DellScrape {
         + newPrice;
 
     Twilio.init(accountSid, authToken);
-    MessageCreator messageCreator = Message.creator(new PhoneNumber("+353852112881"),
+
+    try {
+      MessageCreator messageCreator = Message.creator(new PhoneNumber("+353852112881"),
           new PhoneNumber("+353861801038"), messageContent);
-    messageCreator.create();
-    
+      messageCreator.create();
+    } catch (ApiException e) {
+      logger.warn("Error in sendText Method", e);
+    }
   }
   
   public static String getStringContaining(String start, String end, String string) {

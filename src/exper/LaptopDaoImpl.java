@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class LaptopDaoImpl implements LaptopDao {
   private Connection conn = null;
@@ -17,8 +18,14 @@ public class LaptopDaoImpl implements LaptopDao {
 
   private final String daysDate =
       new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
-
   
+  /**
+   * Implementation of Data Access Object to store and retrieve data 
+   * stored in an AWS Relational Database table. <br><br>
+   * The constructor method looks for the database URL and credentials
+   * stored in the system environment.
+   *  
+   */
   public LaptopDaoImpl() {
    
     String url = System.getenv().get("AWSdatabase");
@@ -37,6 +44,7 @@ public class LaptopDaoImpl implements LaptopDao {
 
   @Override
   public Map<String, Double> getPrices() {
+   
     final String sql = "SELECT " 
         + "Identifier, price " 
         + "FROM laptopInfo.dbo.laptopRecords " 
@@ -45,11 +53,9 @@ public class LaptopDaoImpl implements LaptopDao {
     
     try {
       resultSet = statement.executeQuery(sql);
-
       while (resultSet.next()) {
         map.put(resultSet.getString(1), resultSet.getDouble(2));
       }
-
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -66,35 +72,24 @@ public class LaptopDaoImpl implements LaptopDao {
         + "           ,[price]" 
         + "           ,[laptoName])"
         + "     VALUES";
-    
-    final String valuesDummy = "('test1','" 
-        + daysDate 
-        + "','modelTest' " 
-        + ",0000 " 
-        + ",'nameTest')";
-    
-    StringBuilder sqlAddRecords = new StringBuilder();
-    sqlAddRecords.append(laptopRecordsInsertHeader);
+        
+    StringJoiner sqlAddRecords = new StringJoiner(", ");
     for (Laptop laptopResult : newLaptopResults.values()) {
-      String values = "('" + laptopResult.getItemIdentifier() 
-                         + "','" + daysDate 
-                         + "','" + laptopResult.getLaptopModel() 
-                         + "'," + laptopResult.getPrice() 
-                         + ",'" + laptopResult.getName() 
-                         + "'),";
-      sqlAddRecords.append(values);
+      
+      String values = "('" 
+          + laptopResult.getItemIdentifier() 
+          + "','" + daysDate 
+          + "','" + laptopResult.getLaptopModel() 
+          + "'," + laptopResult.getPrice() 
+          + ",'" + laptopResult.getName() 
+          + "')";
+      sqlAddRecords.add(values);
     }
-    sqlAddRecords.append(valuesDummy);
-
+    
+    String sqlStatment = laptopRecordsInsertHeader + sqlAddRecords.toString(); 
     try {
-      statement.executeUpdate(sqlAddRecords.toString());
-   
-      statement.executeUpdate(
-          "USE [laptopInfo]\r\n" 
-          + "DELETE FROM [dbo].[laptopRecords]\r\n"
-              + "      WHERE Identifier = 'test1'");
+      statement.executeUpdate(sqlStatment);
     } catch (SQLException e) {
-
       e.printStackTrace();
     }
   }

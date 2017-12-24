@@ -1,12 +1,12 @@
 package exper;
 
-public class Laptop implements Comparable<Object> {
+public class Laptop {
 
   private String laptopModel;
   private String name;
   private Double price;
   private String cpuDescription;
-  private String CPU;
+  private String cpu;
   private String operatingSysDescription;
   private String ramDescription;
   private String diskDescription;
@@ -16,7 +16,7 @@ public class Laptop implements Comparable<Object> {
   private String productSoldOut;
   private String itemIdentifier;
 
-  public Laptop(String laptopModel, String name, Double price, String cpuDescription, String CPU,
+  public Laptop(String laptopModel, String name, Double price, String cpuDescription, String cpu,
       String operatingSysDescription, String ramDescription, String diskDescription, 
       String graphicsDescription,String graphicsModel, String screenDescription, 
       String productSoldOut, String itemIdentifier) {
@@ -24,7 +24,7 @@ public class Laptop implements Comparable<Object> {
     this.name = name;
     this.price = price;
     this.cpuDescription = cpuDescription;
-    this.CPU = CPU;
+    this.cpu = cpu;
     this.operatingSysDescription = operatingSysDescription;
     this.ramDescription = ramDescription;
     this.diskDescription = diskDescription;
@@ -51,8 +51,8 @@ public class Laptop implements Comparable<Object> {
     return cpuDescription;
   }
 
-  public String getCPU() {
-    return CPU;
+  public String getCpuU() {
+    return cpu;
   }
 
   public String getOperatingSysDescription() {
@@ -85,14 +85,5 @@ public class Laptop implements Comparable<Object> {
 
   public String getItemIdentifier() {
     return itemIdentifier;
-  }
-
-  @Override
-  public int compareTo(Object anotherLaptop) {
-    if (!(anotherLaptop instanceof Laptop))
-      throw new ClassCastException("A Laptop object expected.");
-    Double anotherLaptopPrice = ((Laptop) anotherLaptop).getPrice();
-    return (int) (this.price - anotherLaptopPrice);
-
   }
 }
