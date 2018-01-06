@@ -17,7 +17,7 @@ public class LaptopDaoImpl implements LaptopDao {
   private ResultSet resultSet = null;
 
   private final String daysDate =
-      new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+      new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
   
   /**
    * Implementation of Data Access Object to store and retrieve data 
@@ -45,10 +45,19 @@ public class LaptopDaoImpl implements LaptopDao {
   @Override
   public Map<String, Double> getPrices() {
    
-    final String sql = "SELECT " 
-        + "Identifier, price " 
-        + "FROM laptopInfo.dbo.laptopRecords " 
-        + "order by date desc";
+    final String sql = "select  \r\n" 
+        + "Identifier, \r\n"  
+        + "price\r\n"  
+        + "from\r\n"  
+        + "(\r\n" 
+        + "select \r\n" 
+        + " Identifier, \r\n"  
+        + "     price,\r\n"  
+        + "    date,\r\n" 
+        + "       max(date) over (partition by Identifier) max_my_date\r\n"  
+        + "  FROM laptopInfo.dbo.laptopRecords \r\n"  
+        + ")  a\r\n" 
+        + "where date = max_my_date \r\n" ;
     Map<String, Double> map = new HashMap<>();
     
     try {

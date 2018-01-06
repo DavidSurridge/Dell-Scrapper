@@ -83,8 +83,7 @@ public class DellScrape {
             DellLaptopBuilder dellLaptopBulilder = new DellLaptopBuilder(input);
             Laptop laptop = dellLaptopBulilder.getLaptop();
             String laptopId = laptop.getItemIdentifier();
-            
-            double newPrice = laptop.getPrice(); 
+            double newPrice = laptop.getPrice();
             double currentPrice = currentPrices.isEmpty() ? 0 : currentPrices.get(laptopId);
             double priceDiff = currentPrice - newPrice;
              
